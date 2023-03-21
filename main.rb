@@ -36,8 +36,8 @@ def save_svg_to_file(svg, file)
   File.write(file, svg)
 end
 
-if ARGV.length != 6
-  puts "Usage: ruby combine_svgs.rb <source_directory> <output_file> <rows> <columns> <margin_top> <margin_left>"
+if ARGV.length < 4
+  puts "Usage: ruby combine_svgs.rb <source_directory> <output_file> <rows> <columns> [margin_top] [margin_left]"
   exit(1)
 end
 
@@ -45,8 +45,8 @@ source_directory = ARGV[0]
 output_file = ARGV[1]
 rows = ARGV[2].to_i
 columns = ARGV[3].to_i
-margin_top = ARGV[4].to_i
-margin_left = ARGV[5].to_i
+margin_top = ARGV[4] ? ARGV[4].to_i : 0
+margin_left = ARGV[5] ? ARGV[5].to_i : 0
 
 svg_files = list_svg_files(source_directory).sort_by { |file| File.basename(file, '.svg').to_i }[0...rows * columns]
 
@@ -57,4 +57,3 @@ end
 
 combined_svg = create_combined_svg(combined_elements, rows, columns, margin_top, margin_left)
 save_svg_to_file(combined_svg, output_file)
-
