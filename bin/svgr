@@ -1,0 +1,15 @@
+#!/usr/bin/env ruby
+
+require_relative '../lib/svgr'
+
+# The first command-line argument will be the subcommand (e.g., "combine")
+subcommand = ARGV.shift
+
+case subcommand
+when 'combine'
+  Svgr::CombineSvgs.start(ARGV)
+else
+  puts "Unknown subcommand: #{subcommand}"
+  puts "Usage: svgr combine <source_directory> <output_file> <rows> <columns> [options]"
+  exit(1)
+end

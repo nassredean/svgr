@@ -1,0 +1,132 @@
+require "nokogiri"
+require "optparse"
+
+module Svgr
+  class CombineSvgs
+    def self.start(argv)
+      options = {
+        scaling_factor: 1,
+        margin_top: 0,
+        margin_left: 0,
+        sort: "default"
+      }
+
+      OptionParser
+        .new do |opts|
+          opts.banner =
+            "Usage: svgr combine [options] <source_directory> <output_file> <rows> <columns>"
+
+          opts.on(
+            "-s",
+            "--scaling-factor FACTOR",
+            Float,
+            "Scaling factor for the SVG elements"
+          ) { |s| options[:scaling_factor] = s }
+
+          opts.on(
+            "-t",
+            "--margin-top MARGIN",
+            Integer,
+            "Top margin between the SVG elements"
+          ) { |t| options[:margin_top] = t }
+
+          opts.on(
+            "-l",
+            "--margin-left MARGIN",
+            Integer,
+            "Left margin between the SVG elements"
+          ) { |l| options[:margin_left] = l }
+
+          opts.on(
+            "--sort SORT",
+            %w[default random],
+            "Sorting option for the SVG files (default, random)"
+          ) { |sort| options[:sort] = sort }
+        end
+        .parse!(argv)
+
+      if argv.length < 4
+        puts "Usage: svgr combine [options] <source_directory> <output_file> <rows> <columns>"
+        exit(1)
+      end
+
+      source_directory, output_file, rows, columns = argv.shift(4)
+      rows = rows.to_i
+      columns = columns.to_i
+      svg_files =
+        list_svg_files(source_directory, options[:sort])[0...rows * columns]
+
+      combined_elements =
+        svg_files.flat_map do |file|
+          content = read_svg_file(file)
+          extract_svg_elements(content)
+        end
+
+      combined_svg =
+        create_combined_svg(
+          combined_elements,
+          rows,
+          columns,
+          options[:scaling_factor],
+          options[:margin_top],
+          options[:margin_left]
+        )
+
+      save_svg_to_file(combined_svg, output_file)
+    end
+
+    def self.list_svg_files(directory, sort_option)
+      svg_files = Dir.glob(File.join(directory, "*.svg"))
+
+      case sort_option
+      when "default"
+        svg_files.sort_by { |file| File.basename(file, ".svg").to_i }
+      when "random"
+        svg_files.shuffle
+      else
+        puts "Invalid sorting option. Allowed options: default, random"
+        exit(1)
+      end
+    end
+
+    def self.read_svg_file(file)
+      File.read(file)
+    end
+
+    def self.extract_svg_elements(svg_content)
+      doc = Nokogiri.XML(svg_content)
+      doc.remove_namespaces!
+      doc.xpath("//svg/g")
+    end
+
+    def self.create_combined_svg(
+      elements,
+      rows,
+      columns,
+      scaling_factor,
+      margin_top,
+      margin_left
+    )
+      combined_svg =
+        Nokogiri::XML::Builder.new(encoding: "UTF-8") do |xml|
+          xml.svg(xmlns: "http://www.w3.org/2000/svg") do
+            elements.each_with_index do |element, index|
+              row = index / columns
+              col = index % columns
+
+              # Adjust the 'transform' attribute to position and scale the element in the grid
+              transform =
+                "translate(#{col * (100 + margin_left) * scaling_factor}, #{row * (100 + margin_top) * scaling_factor}) scale(#{scaling_factor})"
+              element["transform"] = transform
+              xml << element.to_xml
+            end
+          end
+        end
+      combined_svg.to_xml
+    end
+
+    def self.save_svg_to_file(svg, file)
+      File.write(file, svg)
+    end
+  end
+end
