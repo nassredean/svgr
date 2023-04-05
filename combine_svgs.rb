@@ -1,7 +1,18 @@
 require "nokogiri"
+require "optparse"
 
-def list_svg_files(directory)
-  Dir.glob(File.join(directory, "*.svg"))
+def list_svg_files(directory, sort_option)
+  svg_files = Dir.glob(File.join(directory, "*.svg"))
+
+  case sort_option
+  when "default"
+    svg_files.sort_by { |file| File.basename(file, ".svg").to_i }
+  when "random"
+    svg_files.shuffle
+  else
+    puts "Invalid sorting option. Allowed options: default, random"
+    exit(1)
+  end
 end
 
 def read_svg_file(file)
@@ -45,25 +56,51 @@ def save_svg_to_file(svg, file)
   File.write(file, svg)
 end
 
-if ARGV.length < 5
-  puts "Usage: ruby combine_svgs.rb <source_directory> <output_file> <rows> <columns> <scaling_factor> [margin_top] [margin_left]"
+options = { scaling_factor: 1, margin_top: 0, margin_left: 0, sort: "default" }
+
+OptionParser
+  .new do |opts|
+    opts.banner =
+      "Usage: ruby combine_svgs.rb [options] <source_directory> <output_file> <rows> <columns>"
+
+    opts.on(
+      "-s",
+      "--scaling-factor FACTOR",
+      Float,
+      "Scaling factor for the SVG elements"
+    ) { |s| options[:scaling_factor] = s }
+
+    opts.on(
+      "-t",
+      "--margin-top MARGIN",
+      Integer,
+      "Top margin between the SVG elements"
+    ) { |t| options[:margin_top] = t }
+
+    opts.on(
+      "-l",
+      "--margin-left MARGIN",
+      Integer,
+      "Left margin between the SVG elements"
+    ) { |l| options[:margin_left] = l }
+
+    opts.on(
+      "--sort SORT",
+      %w[default random],
+      "Sorting option for the SVG files (default, random)"
+    ) { |sort| options[:sort] = sort }
+  end
+  .parse!
+
+if ARGV.length < 4
+  puts "Usage: ruby combine_svgs.rb [options] <source_directory> <output_file> <rows> <columns>"
   exit(1)
 end
 
-source_directory = ARGV[0]
-output_file = ARGV[1]
-rows = ARGV[2].to_i
-columns = ARGV[3].to_i
-scaling_factor = ARGV[4].to_f
-margin_top = ARGV[5] ? ARGV[5].to_i : 0
-margin_left = ARGV[6] ? ARGV[6].to_i : 0
-
-svg_files =
-  list_svg_files(source_directory).sort_by do |file|
-    File.basename(file, ".svg").to_i
-  end[
-    0...rows * columns
-  ]
+source_directory, output_file, rows, columns = ARGV.shift(4)
+rows = rows.to_i
+columns = columns.to_i
+svg_files = list_svg_files(source_directory, options[:sort])[0...rows * columns]
 
 combined_elements =
   svg_files.flat_map do |file|
@@ -76,9 +113,9 @@ combined_svg =
     combined_elements,
     rows,
     columns,
-    scaling_factor,
-    margin_top,
-    margin_left
+    options[:scaling_factor],
+    options[:margin_top],
+    options[:margin_left]
   )
 
 save_svg_to_file(combined_svg, output_file)
