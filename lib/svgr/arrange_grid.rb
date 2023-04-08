@@ -74,11 +74,16 @@ module Svgr
             extract_svg_elements(content)
           end
 
+        # Collect the file roots
+        file_roots = svg_files.map { |file| File.basename(file, ".svg") }
+
+        # Pass the file_roots to the create_combined_svg method
         combined_svg = create_combined_svg(
           combined_elements,
           rows,
           columns,
           options[:scaling_factor],
+          file_roots,
           margin: { top: options[:margin_top], left: options[:margin_left] },
         )
 
@@ -127,6 +132,7 @@ module Svgr
         rows,
         columns,
         scaling_factor,
+        file_roots,
         margin: {}
       )
         margin_top = margin.fetch(:top, 0)
@@ -144,27 +150,33 @@ module Svgr
               xmlns: "http://www.w3.org/2000/svg",
               width: width,
               height: height,
-            ) do
-              elements.each_with_index do |element, index|
-                row = index / columns
-                col = index % columns
-
-                # Adjust the 'transform' attribute to position and scale the element in the grid
-                x =
-                  col * (100 * scaling_factor + margin_left * scaling_factor) +
-                  (width - 100 * scaling_factor) / 2
-                y = row * (100 * scaling_factor + margin_top * scaling_factor)
-
-                # Offset by half the size of the element vertically and horizontally
-                x += 50 * scaling_factor
-                y += 50 * scaling_factor
-
-                transform = "translate(#{x}, #{y}) scale(#{scaling_factor})"
-                element["transform"] = transform
-                xml << element.to_xml
-              end
-            end
+            )
           end
+
+        # Add a metadata element containing the file roots
+        metadata = Nokogiri::XML::Node.new("metadata", combined_svg.doc)
+        metadata.content = "File roots: #{file_roots.join(",")}"
+        combined_svg.doc.root.add_child(metadata)
+
+        elements.each_with_index do |element, index|
+          row = index / columns
+          col = index % columns
+
+          # Adjust the 'transform' attribute to position and scale the element in the grid
+          x =
+            col * (100 * scaling_factor + margin_left * scaling_factor) +
+            (width - 100 * scaling_factor) / 2
+          y = row * (100 * scaling_factor + margin_top * scaling_factor)
+
+          # Offset by half the size of the element vertically and horizontally
+          x += 50 * scaling_factor
+          y += 50 * scaling_factor
+
+          transform = "translate(#{x}, #{y}) scale(#{scaling_factor})"
+          element["transform"] = transform
+          combined_svg.doc.root << element
+        end
+
         combined_svg.to_xml
       end
 

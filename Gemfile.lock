@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    svgr (0.1.0)
+    svgr (0.1.1)
       nokogiri (~> 1)
 
 GEM

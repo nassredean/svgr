@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |spec|
   spec.name = "svgr"
-  spec.version = "0.1.1"
+  spec.version = "0.1.2"
   spec.authors = ["Nassredean Nasseri"]
   spec.summary = "A tool for working with SVG files"
   spec.description =
