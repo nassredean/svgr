@@ -12,6 +12,6 @@ Gem::Specification.new do |spec|
   spec.bindir = "bin"
   spec.executables = ["svgr"]
   spec.require_paths = ["lib"]
-
-  spec.add_dependency "nokogiri", "~> 1.12"
+  spec.add_development_dependency "rspec", "~> 3"
+  spec.add_dependency "nokogiri", "~> 1"
 end

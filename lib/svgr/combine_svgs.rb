@@ -11,48 +11,55 @@ module Svgr
         sort: "default"
       }
 
-      parser = OptionParser
-        .new do |opts|
-          opts.banner =
-            "Usage: svgr combine [options] <source_directory> <rows> <columns>"
+      opt_parser = OptionParser.new do |opts|
+        opts.banner =
+          "Usage: svgr combine [options] <source_directory> <rows> <columns>"
 
-          opts.on(
-            "-s",
-            "--scaling-factor FACTOR",
-            Float,
-            "Scaling factor for the SVG elements"
-          ) { |s| options[:scaling_factor] = s }
+        opts.on(
+          "-s",
+          "--scaling-factor FACTOR",
+          Float,
+          "Scaling factor for the SVG elements"
+        ) { |s| options[:scaling_factor] = s }
 
-          opts.on(
-            "-t",
-            "--margin-top MARGIN",
-            Integer,
-            "Top margin between the SVG elements"
-          ) { |t| options[:margin_top] = t }
+        opts.on(
+          "-t",
+          "--margin-top MARGIN",
+          Integer,
+          "Top margin between the SVG elements"
+        ) { |t| options[:margin_top] = t }
 
-          opts.on(
-            "-l",
-            "--margin-left MARGIN",
-            Integer,
-            "Left margin between the SVG elements"
-          ) { |l| options[:margin_left] = l }
+        opts.on(
+          "-l",
+          "--margin-left MARGIN",
+          Integer,
+          "Left margin between the SVG elements"
+        ) { |l| options[:margin_left] = l }
 
-          opts.on(
-            "--sort SORT",
-            %w[default random],
-            "Sorting option for the SVG files (default, random)"
-          ) { |sort| options[:sort] = sort }
+        opts.on(
+          "--sort SORT",
+          %w[default random],
+          "Sorting option for the SVG files (default, random)"
+        ) { |sort| options[:sort] = sort }
 
-          opts.on(
-            "--out FILE",
-            "Specify an output file path"
-          ) { |file| options[:out] = file }
-        end
-        .parse!(argv)
+        opts.on(
+          "--out FILE",
+          "Specify an output file path"
+        ) { |file| options[:out] = file }
+
+        opts.on(
+          "-h",
+          "--help",
+          "Prints this help"
+        ) do
+            puts opts
+            exit
+          end
+      end
+      opt_parser.parse!(argv)
 
       if argv.length < 3
-        puts argv.length
-        puts parser.help
+        puts opt_parser.parse! %w[--help]
         exit(1)
       end
 
