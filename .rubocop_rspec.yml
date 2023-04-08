@@ -8,3 +8,5 @@ RSpec/MultipleMemoizedHelpers:
   Enabled: false
 RSpec/ExampleLength:
   Enabled: false
+RSpec/MultipleExpectations:
+  Enabled: false

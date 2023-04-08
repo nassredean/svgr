@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 require "spec_helper"
-require_relative "../lib/svgr/combine_svgs"
+require_relative "../../lib/svgr/combine_svgs"
 
 RSpec.describe(Svgr::CombineSvgs) do
-  let(:fixtures_path) { File.expand_path("fixtures/coiledwall", __dir__) }
+  let(:fixtures_path) { File.expand_path("../fixtures/coiledwall", __dir__) }
 
   describe ".start" do
     let(:rows) { 1 }
@@ -65,7 +65,7 @@ RSpec.describe(Svgr::CombineSvgs) do
       it "sorts the SVGs using the specified option" do
         # Run the command multiple times to check for randomness
         outputs = []
-        3.times { outputs << capture_stdout { described_class } }
+        5.times { outputs << capture_stdout { described_class.start(argv) } }
 
         # Check if the outputs are different, indicating randomness
         unique_outputs = outputs.uniq
