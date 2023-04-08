@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Gem::Specification.new do |spec|
   spec.name = "svgr"
   spec.version = "0.1.0"
@@ -12,6 +14,9 @@ Gem::Specification.new do |spec|
   spec.bindir = "bin"
   spec.executables = ["svgr"]
   spec.require_paths = ["lib"]
-  spec.add_development_dependency "rspec", "~> 3"
-  spec.add_dependency "nokogiri", "~> 1"
+  spec.add_development_dependency("rspec", "~> 3")
+  spec.add_development_dependency("rubocop", "~> 1")
+  spec.add_development_dependency("rubocop-rspec", "~> 2")
+  spec.add_development_dependency("rubocop-shopify", "~> 2")
+  spec.add_dependency("nokogiri", "~> 1")
 end

@@ -10,6 +10,6 @@ when 'combine'
   Svgr::CombineSvgs.start(ARGV)
 else
   puts "Unknown subcommand: #{subcommand}"
-  puts "Usage: svgr combine <source_directory> <output_file> <rows> <columns> [options]"
+  puts 'Usage: svgr combine <source_directory> <output_file> <rows> <columns> [options]'
   exit(1)
 end

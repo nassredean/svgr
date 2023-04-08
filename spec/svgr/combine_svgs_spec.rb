@@ -1,21 +1,23 @@
+# frozen_string_literal: true
+
 require "spec_helper"
 require_relative "../lib/svgr/combine_svgs"
 
-RSpec.describe Svgr::CombineSvgs do
-  let(:fixtures_path) { File.expand_path("../fixtures/coiledwall", __FILE__) }
+RSpec.describe(Svgr::CombineSvgs) do
+  let(:fixtures_path) { File.expand_path("fixtures/coiledwall", __dir__) }
 
   describe ".start" do
     let(:rows) { 1 }
     let(:columns) { 3 }
     let(:argv) { [fixtures_path, rows, columns] }
 
-    let(:output) { capture_stdout { Svgr::CombineSvgs.start(argv) } }
+    let(:output) { capture_stdout { described_class.start(argv) } }
 
     it "combines the specified number of SVGs" do
       doc = Nokogiri.XML(output)
       doc.remove_namespaces!
       combined_elements = doc.xpath("//svg/g")
-      expect(combined_elements.size).to eq(rows * columns)
+      expect(combined_elements.size).to(eq(rows * columns))
     end
 
     context "when margin options are specified" do
@@ -29,7 +31,7 @@ RSpec.describe Svgr::CombineSvgs do
           "--margin-top",
           margin_top.to_s,
           "--margin-left",
-          margin_left.to_s
+          margin_left.to_s,
         ]
       end
 
@@ -49,7 +51,7 @@ RSpec.describe Svgr::CombineSvgs do
           transform = element["transform"]
           expected_transform = "translate(#{x.to_i}, #{y.to_i})"
 
-          expect(transform).to include(expected_transform)
+          expect(transform).to(include(expected_transform))
         end
       end
     end
@@ -63,11 +65,11 @@ RSpec.describe Svgr::CombineSvgs do
       it "sorts the SVGs using the specified option" do
         # Run the command multiple times to check for randomness
         outputs = []
-        3.times { outputs << capture_stdout { Svgr::CombineSvgs.start(argv) } }
+        3.times { outputs << capture_stdout { described_class } }
 
         # Check if the outputs are different, indicating randomness
         unique_outputs = outputs.uniq
-        expect(unique_outputs.length).to be > 1
+        expect(unique_outputs.length).to(be > 1)
       end
     end
   end

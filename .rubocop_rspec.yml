@@ -1,0 +1,10 @@
+require: rubocop-rspec
+
+inherit_gem:
+  rubocop-rspec:
+    - config/default.yml
+
+RSpec/MultipleMemoizedHelpers:
+  Enabled: false
+RSpec/ExampleLength:
+  Enabled: false
