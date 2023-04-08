@@ -58,7 +58,7 @@ module Svgr
         opt_parser.parse!(argv)
 
         if argv.length < 3
-          puts opt_parser.parse!(["--help"])
+          puts opt_parser.help
           exit(1)
         end
 

@@ -1,15 +1,50 @@
 #!/usr/bin/env ruby
 
-require_relative '../lib/svgr'
+require "optparse"
+require_relative "../lib/svgr/combine_svgs"
+require_relative "../lib/svgr/document_resize"
 
-# The first command-line argument will be the subcommand (e.g., "combine")
-subcommand = ARGV.shift
+module Svgr
+  def self.start(argv)
+    global_opts = {}
 
-case subcommand
-when 'combine'
-  Svgr::CombineSvgs.start(ARGV)
-else
-  puts "Unknown subcommand: #{subcommand}"
-  puts 'Usage: svgr combine <source_directory> <output_file> <rows> <columns> [options]'
-  exit(1)
+    subcommands = {
+      "combine" => ->(args) { Svgr::CombineSvgs.start(args) },
+      "document:resize" => ->(args) { Svgr::DocumentResize.start(args) },
+    }
+
+    opt_parser = OptionParser.new do |opts|
+      opts.banner = "Usage: svgr [options] <subcommand>"
+
+      opts.separator ""
+      opts.separator "Subcommands:"
+      subcommands.each do |name, _|
+        opts.separator "  #{name}"
+      end
+
+      opts.separator ""
+      opts.separator "Global options:"
+
+      opts.on("-h", "--help", "Prints this help") do
+        puts opts
+        exit
+      end
+    end
+
+    opt_parser.order!(argv)
+
+    if argv.empty?
+      puts opt_parser
+      exit(1)
+    end
+
+    subcommand = argv.shift
+    subcommands.fetch(subcommand).call(argv)
+  rescue KeyError
+    puts "Error: Unknown subcommand '#{subcommand}'"
+    puts opt_parser
+    exit(1)
+  end
 end
+
+Svgr.start(ARGV)
