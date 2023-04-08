@@ -99,7 +99,22 @@ module Svgr
     def self.extract_svg_elements(svg_content)
       doc = Nokogiri.XML(svg_content)
       doc.remove_namespaces!
-      doc.xpath("//svg/g")
+      top_level_groups = doc.xpath("//svg/g")
+
+      if top_level_groups.empty?
+        # Wrap all child elements of the SVG document in a group
+        svg_element = doc.at_xpath("//svg")
+        new_group = Nokogiri::XML::Node.new("g", doc)
+
+        svg_element.children.each do |child|
+          new_group.add_child(child)
+        end
+
+        svg_element.add_child(new_group)
+        top_level_groups = [new_group]
+      end
+
+      top_level_groups
     end
 
     def self.create_combined_svg(
