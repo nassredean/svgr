@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require "spec_helper"
-require_relative "../../lib/svgr/combine_svgs"
+require_relative "../../lib/svgr/arrange_grid"
 
-RSpec.describe(Svgr::CombineSvgs) do
+RSpec.describe(Svgr::ArrangeGrid) do
   let(:fixtures_path) { File.expand_path("../fixtures/coiledwall", __dir__) }
 
   describe ".start" do

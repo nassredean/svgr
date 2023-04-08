@@ -4,7 +4,7 @@ require "nokogiri"
 require "optparse"
 
 module Svgr
-  class CombineSvgs
+  class ArrangeGrid
     class << self
       def start(argv)
         options = {
@@ -17,7 +17,7 @@ module Svgr
         opt_parser =
           OptionParser.new do |opts|
             opts.banner =
-              "Usage: svgr combine [options] <source_directory> <rows> <columns>"
+              "Usage: svgr arrange:grid [options] <source_directory> <rows> <columns>"
 
             opts.on(
               "-s",

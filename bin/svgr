@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require "optparse"
-require_relative "../lib/svgr/combine_svgs"
+require_relative "../lib/svgr/arrange_grid"
 require_relative "../lib/svgr/document_resize"
 
 module Svgr
@@ -9,7 +9,7 @@ module Svgr
     global_opts = {}
 
     subcommands = {
-      "combine" => ->(args) { Svgr::CombineSvgs.start(args) },
+      "arrange:grid" => ->(args) { Svgr::ArrangeGrid.start(args) },
       "document:resize" => ->(args) { Svgr::DocumentResize.start(args) },
     }
 
