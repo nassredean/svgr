@@ -11,10 +11,10 @@ module Svgr
         sort: "default"
       }
 
-      OptionParser
+      parser = OptionParser
         .new do |opts|
           opts.banner =
-            "Usage: svgr combine [options] <source_directory> <output_file> <rows> <columns>"
+            "Usage: svgr combine [options] <source_directory> <rows> <columns>"
 
           opts.on(
             "-s",
@@ -42,37 +42,40 @@ module Svgr
             %w[default random],
             "Sorting option for the SVG files (default, random)"
           ) { |sort| options[:sort] = sort }
+
+          opts.on(
+            "--out FILE",
+            "Specify an output file path"
+          ) { |file| options[:out] = file }
         end
         .parse!(argv)
 
-      if argv.length < 4
-        puts "Usage: svgr combine [options] <source_directory> <output_file> <rows> <columns>"
+      if argv.length < 3
+        puts argv.length
+        puts parser.help
         exit(1)
       end
 
-      source_directory, output_file, rows, columns = argv.shift(4)
+      source_directory, rows, columns = argv.shift(3)
       rows = rows.to_i
       columns = columns.to_i
-      svg_files =
-        list_svg_files(source_directory, options[:sort])[0...rows * columns]
+      svg_files = list_svg_files(source_directory, options[:sort])[0...rows * columns]
 
-      combined_elements =
-        svg_files.flat_map do |file|
-          content = read_svg_file(file)
-          extract_svg_elements(content)
-        end
+      combined_elements = svg_files.flat_map do |file|
+        content = read_svg_file(file)
+        extract_svg_elements(content)
+      end
 
-      combined_svg =
-        create_combined_svg(
-          combined_elements,
-          rows,
-          columns,
-          options[:scaling_factor],
-          options[:margin_top],
-          options[:margin_left]
-        )
+      combined_svg = create_combined_svg(
+        combined_elements,
+        rows,
+        columns,
+        options[:scaling_factor],
+        options[:margin_top],
+        options[:margin_left]
+      )
 
-      save_svg_to_file(combined_svg, output_file)
+      write_svg(combined_svg, options[:out])
     end
 
     def self.list_svg_files(directory, sort_option)
@@ -125,8 +128,13 @@ module Svgr
       combined_svg.to_xml
     end
 
-    def self.save_svg_to_file(svg, file)
-      File.write(file, svg)
+
+    def self.write_svg(svg, output_file = nil)
+      if output_file
+        File.write(output_file, svg)
+      else
+        puts svg
+      end
     end
   end
 end
