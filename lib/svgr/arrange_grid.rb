@@ -11,13 +11,12 @@ module Svgr
           scaling_factor: 1,
           margin_top: 0,
           margin_left: 0,
-          sort: "default",
         }
 
         opt_parser =
           OptionParser.new do |opts|
             opts.banner =
-              "Usage: svgr arrange:grid [options] <source_directory> <rows> <columns>"
+              "Usage: svgr arrange:grid [options] <file_paths> <rows> <columns>"
 
             opts.on(
               "-s",
@@ -40,16 +39,6 @@ module Svgr
               "Left margin between the SVG elements",
             ) { |l| options[:margin_left] = l }
 
-            opts.on(
-              "--sort SORT",
-              ["default", "random"],
-              "Sorting option for the SVG files (default, random)",
-            ) { |sort| options[:sort] = sort }
-
-            opts.on("--out FILE", "Specify an output file path") do |file|
-              options[:out] = file
-            end
-
             opts.on("-h", "--help", "Prints this help") do
               puts opts
               exit
@@ -62,11 +51,10 @@ module Svgr
           exit(1)
         end
 
-        source_directory, rows, columns = argv.shift(3)
+        file_paths, rows, columns = argv.shift(3)
         rows = rows.to_i
         columns = columns.to_i
-        svg_files =
-          list_svg_files(source_directory, options[:sort])[0...rows * columns]
+        svg_files = file_paths.split(",")[0...rows * columns]
 
         combined_elements =
           svg_files.flat_map do |file|
@@ -74,34 +62,15 @@ module Svgr
             extract_svg_elements(content)
           end
 
-        # Collect the file roots
-        file_roots = svg_files.map { |file| File.basename(file, ".svg") }
-
-        # Pass the file_roots to the create_combined_svg method
         combined_svg = create_combined_svg(
           combined_elements,
           rows,
           columns,
           options[:scaling_factor],
-          file_roots,
           margin: { top: options[:margin_top], left: options[:margin_left] },
         )
 
-        write_svg(combined_svg, options[:out])
-      end
-
-      def list_svg_files(directory, sort_option)
-        svg_files = Dir.glob(File.join(directory, "*.svg"))
-
-        case sort_option
-        when "default"
-          svg_files.sort_by { |file| File.basename(file, ".svg").to_i }
-        when "random"
-          svg_files.shuffle
-        else
-          puts "Invalid sorting option. Allowed options: default, random"
-          exit(1)
-        end
+        write_svg(combined_svg)
       end
 
       def read_svg_file(file)
@@ -132,7 +101,6 @@ module Svgr
         rows,
         columns,
         scaling_factor,
-        file_roots,
         margin: {}
       )
         margin_top = margin.fetch(:top, 0)
@@ -150,43 +118,35 @@ module Svgr
               xmlns: "http://www.w3.org/2000/svg",
               width: width,
               height: height,
-            )
+            ) do
+              elements.each_with_index do |element, index|
+                row = index / columns
+                col = index % columns
+
+                # Adjust the 'transform' attribute to position and scale the element in the grid
+                x =
+                  col * (100 * scaling_factor + margin_left * scaling_factor) +
+                  (width - 100 * scaling_factor) / 2
+                y = row * (100 * scaling_factor + margin_top * scaling_factor)
+
+                # Offset by half the size of the element vertically and horizontally
+                x += 50 * scaling_factor
+                y += 50 * scaling_factor
+
+                transform = "translate(#{x}, #{y}) scale(#{scaling_factor})"
+                element["transform"] = transform
+                xml.parent << element
+              end
+            end
           end
-
-        # Add a metadata element containing the file roots
-        metadata = Nokogiri::XML::Node.new("metadata", combined_svg.doc)
-        metadata.content = "File roots: #{file_roots.join(",")}"
-        combined_svg.doc.root.add_child(metadata)
-
-        elements.each_with_index do |element, index|
-          row = index / columns
-          col = index % columns
-
-          # Adjust the 'transform' attribute to position and scale the element in the grid
-          x =
-            col * (100 * scaling_factor + margin_left * scaling_factor) +
-            (width - 100 * scaling_factor) / 2
-          y = row * (100 * scaling_factor + margin_top * scaling_factor)
-
-          # Offset by half the size of the element vertically and horizontally
-          x += 50 * scaling_factor
-          y += 50 * scaling_factor
-
-          transform = "translate(#{x}, #{y}) scale(#{scaling_factor})"
-          element["transform"] = transform
-          combined_svg.doc.root << element
-        end
 
         combined_svg.to_xml
       end
 
-      def write_svg(svg, output_file = nil)
-        if output_file
-          File.write(output_file, svg)
-        else
-          puts svg
-        end
+      def write_svg(svg)
+        puts svg
       end
     end
   end
 end
+
