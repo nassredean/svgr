@@ -1,16 +1,16 @@
 # frozen_string_literal: true
 
 require "spec_helper"
-require_relative "../../lib/svgr/arrange_grid"
+require "./lib/svgr/arrange/grid"
 
-RSpec.describe(Svgr::ArrangeGrid) do
-  let(:fixtures_path) { File.expand_path("../fixtures/coiledwall", __dir__) }
+RSpec.describe(Svgr::Arrange::Grid) do
+  let(:fixtures_path) { File.expand_path("../../fixtures/coiledwall", __dir__) }
 
   describe ".start" do
     let(:rows) { 1 }
     let(:columns) { 3 }
-    let(:argv) { [fixtures_path, rows, columns] }
-
+    let(:file_paths) { Dir.glob(File.join(fixtures_path, "*.svg")).first(3).join(",") }
+    let(:argv) { [file_paths, rows, columns] }
     let(:output) { capture_stdout { described_class.start(argv) } }
 
     it "combines the specified number of SVGs" do
@@ -25,7 +25,7 @@ RSpec.describe(Svgr::ArrangeGrid) do
       let(:margin_left) { 20 }
       let(:argv) do
         [
-          fixtures_path,
+          file_paths,
           rows.to_s,
           columns.to_s,
           "--margin-top",
@@ -55,31 +55,5 @@ RSpec.describe(Svgr::ArrangeGrid) do
         end
       end
     end
-
-    context "when sort option is specified" do
-      let(:sort_option) { "random" }
-      let(:argv) do
-        [fixtures_path, rows.to_s, columns.to_s, "--sort", sort_option]
-      end
-
-      it "sorts the SVGs using the specified option" do
-        # Run the command multiple times to check for randomness
-        outputs = []
-        5.times { outputs << capture_stdout { described_class.start(argv) } }
-
-        # Check if the outputs are different, indicating randomness
-        unique_outputs = outputs.uniq
-        expect(unique_outputs.length).to(be > 1)
-      end
-    end
   end
-end
-
-def capture_stdout
-  original_stdout = $stdout
-  $stdout = StringIO.new
-  yield
-  $stdout.string
-ensure
-  $stdout = original_stdout
 end
