@@ -21,7 +21,7 @@ RSpec.describe(Svgr::Document::Recolor) do
       elements_with_fill = doc.xpath("//svg/*[@fill]")
 
       elements_with_fill.each do |element|
-        expect(element["fill"]).to eq(hex_value)
+        expect(element["fill"]).to(eq(hex_value))
       end
     end
 
@@ -31,7 +31,7 @@ RSpec.describe(Svgr::Document::Recolor) do
       elements_with_stroke = doc.xpath("//svg/*[@stroke]")
 
       elements_with_stroke.each do |element|
-        expect(element["stroke"]).to eq(hex_value)
+        expect(element["stroke"]).to(eq(hex_value))
       end
     end
 
@@ -41,8 +41,8 @@ RSpec.describe(Svgr::Document::Recolor) do
       elements_without_fill_or_stroke = doc.xpath("//svg/*[not(@fill) and not(@stroke)]")
 
       elements_without_fill_or_stroke.each do |element|
-        expect(element["fill"]).to be_nil
-        expect(element["stroke"]).to be_nil
+        expect(element["fill"]).to(be_nil)
+        expect(element["stroke"]).to(be_nil)
       end
     end
   end
