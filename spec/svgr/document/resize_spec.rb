@@ -35,7 +35,7 @@ RSpec.describe(Svgr::Document::Resize) do
       group_element = doc.at_xpath("//svg/g")
 
       transform = group_element["transform"]
-      expect(transform).to(include("translate(#{397}, #{538})"))
+      expect(transform).to(include("translate(397, 538)"))
     end
   end
 end

@@ -3,6 +3,7 @@
 require "optparse"
 require_relative "../lib/svgr/arrange/grid"
 require_relative "../lib/svgr/document/resize"
+require_relative "../lib/svgr/document/recolor"
 
 module Svgr
   def self.start(argv)
@@ -11,6 +12,7 @@ module Svgr
     subcommands = {
       "arrange:grid" => ->(args) { Svgr::Arrange::Grid.start(args) },
       "document:resize" => ->(args) { Svgr::Document::Resize.start(args) },
+      "document:recolor" => ->(args) { Svgr::Document::Recolor.start(args) }
     }
 
     opt_parser = OptionParser.new do |opts|
