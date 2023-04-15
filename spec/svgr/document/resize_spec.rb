@@ -1,25 +1,27 @@
 # frozen_string_literal: true
 
 require "spec_helper"
-require_relative "../../lib/svgr/document_resize"
+require "./lib/svgr/document/resize"
 
-RSpec.describe(Svgr::DocumentResize) do
-  let(:fixtures_path) { File.expand_path("../../fixtures/coiledwall", __FILE__) }
-  let(:input_svg) { File.read("#{fixtures_path}/take1.svg") }
-
+RSpec.describe(Svgr::Document::Resize) do
   describe ".resize" do
     let(:width) { 210 }
     let(:height) { 285 }
+    let(:argv) { [width, height] }
+    let(:fixtures_path) { File.expand_path("../../../fixtures/coiledwall", __FILE__) }
+    let(:input_svg) { File.read("#{fixtures_path}/take1.svg") }
+    let(:output) { capture_stdout { described_class.start(argv) } }
 
-    let(:resized_svg) do
-      described_class.resize(input_svg, width, height)
+    before do
+      allow($stdin).to(receive(:read).and_return(input_svg))
     end
 
     it "resizes the document to the specified width and height" do
-      doc = Nokogiri::XML(resized_svg)
+      doc = Nokogiri::XML(output)
       doc.remove_namespaces!
       svg_element = doc.at_xpath("//svg")
 
+      # Calculate width and height in pixels using a DPI of 96
       width_px = (width * 96 / 25.4).round
       height_px = (height * 96 / 25.4).round
 
@@ -28,15 +30,12 @@ RSpec.describe(Svgr::DocumentResize) do
     end
 
     it "centers the elements within the resized document" do
-      doc = Nokogiri::XML(resized_svg)
+      doc = Nokogiri::XML(output)
       doc.remove_namespaces!
       group_element = doc.at_xpath("//svg/g")
 
       transform = group_element["transform"]
-      expected_translate_x = ((width * 96 / 25.4) - 300) / 2
-      expected_translate_y = ((height * 96 / 25.4) - 100) / 2
-
-      expect(transform).to(include("translate(#{expected_translate_x}, #{expected_translate_y})"))
+      expect(transform).to(include("translate(#{397}, #{538})"))
     end
   end
 end

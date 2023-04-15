@@ -1,16 +1,16 @@
 #!/usr/bin/env ruby
 
 require "optparse"
-require_relative "../lib/svgr/arrange_grid"
-require_relative "../lib/svgr/document_resize"
+require_relative "../lib/svgr/arrange/grid"
+require_relative "../lib/svgr/document/resize"
 
 module Svgr
   def self.start(argv)
     global_opts = {}
 
     subcommands = {
-      "arrange:grid" => ->(args) { Svgr::ArrangeGrid.start(args) },
-      "document:resize" => ->(args) { Svgr::DocumentResize.start(args) },
+      "arrange:grid" => ->(args) { Svgr::Arrange::Grid.start(args) },
+      "document:resize" => ->(args) { Svgr::Document::Resize.start(args) },
     }
 
     opt_parser = OptionParser.new do |opts|
