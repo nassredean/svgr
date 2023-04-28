@@ -27,7 +27,7 @@ SVGR provides the following commands:
 This command combines multiple SVG files into a single SVG, arranging the elements in a grid.
 
 ```
-svgr arrange:grid <source_directory> <rows> <columns> [options]
+svgr arrange:grid -d <source_directory> -r <rows> -c <columns> [options]
 ```
 
 Options:
