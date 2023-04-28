@@ -10,8 +10,9 @@ RSpec.describe(Svgr::Arrange::Grid) do
     let(:rows) { 1 }
     let(:columns) { 3 }
     let(:file_paths) { Dir.glob(File.join(fixtures_path, "*.svg")).first(3).join(",") }
-    let(:argv) { [file_paths, rows, columns] }
     let(:output) { capture_stdout { described_class.start(argv) } }
+
+    let(:argv) {["-r", rows.to_s, "-c", columns.to_s, "-d", fixtures_path]}
 
     it "combines the specified number of SVGs" do
       doc = Nokogiri.XML(output)
@@ -25,13 +26,16 @@ RSpec.describe(Svgr::Arrange::Grid) do
       let(:margin_left) { 20 }
       let(:argv) do
         [
-          file_paths,
-          rows.to_s,
-          columns.to_s,
           "--margin-top",
           margin_top.to_s,
           "--margin-left",
           margin_left.to_s,
+          "--rows",
+          rows.to_s,
+          "--columns",
+          columns.to_s,
+          "--directory",
+          fixtures_path
         ]
       end
 

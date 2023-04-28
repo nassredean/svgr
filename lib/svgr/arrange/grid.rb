@@ -12,6 +12,9 @@ module Svgr
             scaling_factor: 1,
             margin_top: 0,
             margin_left: 0,
+            rows: 1,
+            columns: 1,
+            directory: Dir.pwd
           }
 
           opt_parser =
@@ -40,6 +43,27 @@ module Svgr
                 "Left margin between the SVG elements",
               ) { |l| options[:margin_left] = l }
 
+              opts.on(
+                "-d",
+                "--directory DIRECTORY",
+                String,
+                "Directory where .svg files are located",
+              ) { |d| options[:directory] = d }
+
+              opts.on(
+                "-r",
+                "--rows ROWS",
+                Integer,
+                "Number of rows to use",
+              ) { |r| options[:rows] = r }
+
+              opts.on(
+                "-c",
+                "--columns COLUMNS",
+                Integer,
+                "Number of columns to use",
+              ){ |c| options[:columns] = c }
+
               opts.on("-h", "--help", "Prints this help") do
                 puts opts
                 exit
@@ -47,15 +71,10 @@ module Svgr
             end
           opt_parser.parse!(argv)
 
-          if argv.length < 3
-            puts opt_parser.help
-            exit(1)
-          end
+          rows = options[:rows].to_i
+          columns = options[:columns].to_i
 
-          file_paths, rows, columns = argv.shift(3)
-          rows = rows.to_i
-          columns = columns.to_i
-          svg_files = file_paths.split(",")[0...rows * columns]
+          svg_files = Dir[File.join(options[:directory], "*.svg")][0..rows*columns]
 
           combined_elements =
             svg_files.flat_map do |file|
@@ -65,8 +84,8 @@ module Svgr
 
           combined_svg = create_combined_svg(
             combined_elements,
-            rows,
-            columns,
+            options[:rows],
+            options[:columns],
             options[:scaling_factor],
             margin: { top: options[:margin_top], left: options[:margin_left] },
           )
