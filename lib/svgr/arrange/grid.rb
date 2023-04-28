@@ -74,7 +74,7 @@ module Svgr
           rows = options[:rows].to_i
           columns = options[:columns].to_i
 
-          svg_files = Dir[File.join(options[:directory], "*.svg")]
+          svg_files = Dir[File.join(options[:directory], "*.svg")][0..rows*columns]
 
           combined_elements =
             svg_files.flat_map do |file|
